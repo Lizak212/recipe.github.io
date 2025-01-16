@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  
+
 </head>
   <title>Recipe Manager</title>
   <style>
@@ -41,21 +41,26 @@
   <?php
   $db = new SQLite3 ("recipe.db");
 
-  $db->exec ("DROP TABLE IF EXISTS recipes");
-  $db->exec ("CREATE TABLE IF NOT EXISTS recipes (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, description TEXT)");
+  // so that the tables will only be made once
+  $start = $db->query ("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'recipes'");
 
-  $db->exec ("DROP TABLE IF EXISTS ingrediants");
-  $db->exec ("CREATE TABLE IF NOT EXISTS ingrediants (id INTEGER PRIMARY KEY AUTOINCREMENT, recipe_id INTEGER, name TEXT, quantity TEXT, FOREIGN KEY (recipe_id) REFERENCES recipes (id))");
-  
-  $db->exec ("INSERT INTO recipes (name, description) VALUES ('Pizza', 'A dish of Italien origin')");
-  $db->exec ("INSERT INTO ingrediants (recipe_id, name, quantity) VALUES (1, 'pizza dough', '1 cup')");
-  $db->exec ("INSERT INTO ingrediants (recipe_id, name, quantity) VALUES (1, 'tomato sauce', '3 cups')");
-  $db->exec ("INSERT INTO ingrediants (recipe_id, name, quantity) VALUES (1, 'cheese', '2 cups')");
+  if (!$start->fetchArray ()) {
+    $db->exec ("DROP TABLE IF EXISTS recipes");
+    $db->exec ("CREATE TABLE IF NOT EXISTS recipes (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, description TEXT)");
 
-  $db->exec ("INSERT INTO recipes (name, description) VALUES ('Pasta', 'An easy and popular dish')");
-  $db->exec ("INSERT INTO ingrediants (recipe_id, name, quantity) VALUES (2, 'pasta', '5 cups')");
-  $db->exec ("INSERT INTO ingrediants (recipe_id, name, quantity) VALUES (2, 'salt', '1 tsp')");
-  $db->exec ("INSERT INTO ingrediants (recipe_id, name, quantity) VALUES (2, 'tomato sauce', '3 cups')");
+    $db->exec ("DROP TABLE IF EXISTS ingrediants");
+    $db->exec ("CREATE TABLE IF NOT EXISTS ingrediants (id INTEGER PRIMARY KEY AUTOINCREMENT, recipe_id INTEGER, name TEXT, quantity TEXT, FOREIGN KEY (recipe_id) REFERENCES recipes (id))");
+
+    $db->exec ("INSERT INTO recipes (name, description) VALUES ('Pizza', 'A dish of Italien origin')");
+    $db->exec ("INSERT INTO ingrediants (recipe_id, name, quantity) VALUES (1, 'pizza dough', '1 cup')");
+    $db->exec ("INSERT INTO ingrediants (recipe_id, name, quantity) VALUES (1, 'tomato sauce', '3 cups')");
+    $db->exec ("INSERT INTO ingrediants (recipe_id, name, quantity) VALUES (1, 'cheese', '2 cups')");
+
+    $db->exec ("INSERT INTO recipes (name, description) VALUES ('Pasta', 'An easy and popular dish')");
+    $db->exec ("INSERT INTO ingrediants (recipe_id, name, quantity) VALUES (2, 'pasta', '5 cups')");
+    $db->exec ("INSERT INTO ingrediants (recipe_id, name, quantity) VALUES (2, 'salt', '1 tsp')");
+    $db->exec ("INSERT INTO ingrediants (recipe_id, name, quantity) VALUES (2, 'tomato sauce', '3 cups')");
+  }
 
   if (isset ($_POST ["submit_r"])){
     $name = $_POST ["recipe"];
@@ -73,7 +78,7 @@
   }
 
   $result = $db->query ("SELECT * FROM recipes");
-  
+
   echo "<h2>Add Recipe</h2>";
 
   echo "<form method= 'POST'>
@@ -86,7 +91,7 @@
     <input type = 'submit' name = 'submit_r'>
   </form>";
 
-  echo "<h2>Add Ingredient</h2>"; // does not add new ingredient to the new recipe, but adds it to the existing recipes no problem
+  echo "<h2>Add Ingredient</h2>"; 
 
   echo "<form method= 'POST'>
     <label> What is the recipe id? </label>
@@ -102,11 +107,10 @@
   </form>";
 
   echo "<h2>All Recipes</h2>";
-  
+
   While ($row = $result->fetchArray (SQLITE3_ASSOC)){
     echo "<h3>". $row ["name"] . "</h3>";
     echo "<p>". $row ["description"] . "</p>";
-    echo "<p>". $row ["id"] . "</p>";
 
     $result2 = $db->query ("SELECT * FROM ingrediants WHERE recipe_id = " . $row["id"]);
 
@@ -125,8 +129,10 @@
 
     echo "</table>";
   }
-
   ?>
+</body>
+</html>
+
 
   
 
